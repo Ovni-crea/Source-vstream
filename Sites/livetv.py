@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 #Vstream https://github.com/Kodi-vStream/venom-xbmc-addons
-# Votre nom ou pseudo
+# Ovni-crea
 from resources.lib.gui.hoster import cHosterGui #systeme de recherche pour l'hote
 from resources.lib.gui.gui import cGui #systeme d'affichage pour xbmc
 from resources.lib.handler.inputParameterHandler import cInputParameterHandler #entree des parametres
@@ -8,167 +8,107 @@ from resources.lib.handler.outputParameterHandler import cOutputParameterHandler
 from resources.lib.handler.requestHandler import cRequestHandler #requete url
 from resources.lib.parser import cParser #recherche de code
 from resources.lib.comaddon import progress, VSlog #import du dialog progress
-from resources.lib.util import cUtil
+from resources.lib.util import cUtil #import du plugin cUtil
 
-#from resources.lib.util import cUtil #outils pouvant etre utiles
+SITE_IDENTIFIER = 'livetv'
+SITE_NAME = 'Livetv.sx'
+SITE_DESC = 'Site pour regarder du sport en direct gratuitement'
 
-#Si vous créez une source et la deposez dans le dossier "sites" elle sera directement visible sous xbmc
-
-SITE_IDENTIFIER = 'livetv' #identifant (nom de votre fichier) remplacez les espaces et les . par _ AUCUN CARACTERE SPECIAL
-SITE_NAME = 'Livetv.sx' #nom que xbmc affiche
-SITE_DESC = 'Site pour regarder du sport en direct gratuitement' #description courte de votre source
-
-URL_MAIN = 'http://livetv.sx/' #url de votre source
-
-#definis les url pour les catégories principale, ceci est automatique, si la definition est présente elle sera affichee.
-#LA RECHERCHE GLOBAL N'UTILE PAS showSearch MAIS DIRECTEMENT LA FONCTION INSCRITE DANS LA VARIABLE URL_SEARCH_*
+URL_MAIN = 'http://livetv.sx/'
 URL_SEARCH = (URL_MAIN + 'frx/fanclubs/?q=', 'showMovies4')
-#recherche global films
-#
 FUNCTION_SEARCH = 'showMovies4'
 
-# menu films existant dans l'acceuil (Home)
-SPORT_SPORTS = (URL_MAIN + 'frx/allupcoming/', 'showMovies') #sport
-#NETS_GENRES = (True, 'showGenres') #video du net (genre)
+SPORT_SPORTS = (URL_MAIN + 'frx/allupcoming/', 'showMovies') #Les matchs en directs
+NETS_GENRES = (True, 'showGenres') #Les clubs de football
 
-def load(): #fonction chargee automatiquement par l'addon l'index de votre navigation.
-    oGui = cGui() #ouvre l'affichage
+def load():
+    oGui = cGui()
 
-    oOutputParameterHandler = cOutputParameterHandler() #appelle la fonction pour sortir un parametre
-    oOutputParameterHandler.addParameter('siteUrl', 'http://venom/') # sortie du parametres siteUrl n'oubliez pas la Majuscule
-    oGui.addDir(SITE_IDENTIFIER, 'showSearch', 'Recherche', 'search.png', oOutputParameterHandler)
-    #Ajoute lien dossier (identifant, function a attendre, nom, icone, parametre de sortie)
-    #Puisque nous ne voulons pas atteindre une url on peut mettre ce qu'on veut dans le parametre siteUrl
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'http://venom/')
+    oGui.addDir(SITE_IDENTIFIER, 'showSearch', 'Rechercher l équipe', 'search.png', oOutputParameterHandler)
 
     oOutputParameterHandler = cOutputParameterHandler()
     oOutputParameterHandler.addParameter('siteUrl', SPORT_SPORTS[0])
     oGui.addDir(SITE_IDENTIFIER, SPORT_SPORTS[1], 'Les matchs en direct', 'news.png', oOutputParameterHandler)
+    
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', NETS_GENRES[0])
+    oGui.addDir(SITE_IDENTIFIER, NETS_GENRES[1], 'Les genres musicaux', 'genres.png', oOutputParameterHandler)
 
-    oGui.setEndOfDirectory() #ferme l'affichage
+    oGui.setEndOfDirectory()
 
-def showSearch(): #fonction de recherche
+def showSearch(): 
     oGui = cGui()
 
-    sSearchText = oGui.showKeyBoard() #appelle le clavier xbmc
+    sSearchText = oGui.showKeyBoard()
     if (sSearchText != False):
-        sUrl = URL_SEARCH[0] + sSearchText #modifie l'url de recherche
-        showMovies4(sUrl) #appelle la fonction qui pourra lire la page de resultats
+        sUrl = URL_SEARCH[0] + sSearchText
+        showMovies4(sUrl) #showMovies4 car c'est pour afficher le club recherché'
         oGui.setEndOfDirectory()
         return
 
 
-def showGenres(): #affiche les genres
+def showGenres(): #affiche les clubs de foot
     oGui = cGui()
 
-    #juste a entrer les categories et les liens qui vont bien
     liste = []
-    liste.append( ['Action', URL_MAIN + 'action/'] )
-    liste.append( ['Animation', URL_MAIN + 'animation/'] )
-    liste.append( ['Arts Martiaux', URL_MAIN + 'arts-martiaux/'] )
-    liste.append( ['Aventure', URL_MAIN + 'aventure/'] )
-    liste.append( ['Biopic', URL_MAIN + 'biopic/'] )
-    liste.append( ['Comédie', URL_MAIN + 'comedie/'] )
-    liste.append( ['Comédie Dramatique', URL_MAIN + 'comedie-dramatique/'] )
-    liste.append( ['Comédie Musicale', URL_MAIN + 'comedie-musicale/'] )
-    liste.append( ['Documentaire', URL_MAIN + 'documentaire/'] )
-    liste.append( ['Drame', URL_MAIN + 'drame/'] )
-    liste.append( ['Epouvante Horreur', URL_MAIN + 'epouvante-horreur/'] )
-    liste.append( ['Erotique', URL_MAIN + 'erotique'] )
-    liste.append( ['Espionnage', URL_MAIN + 'espionnage/'] )
-    liste.append( ['Famille', URL_MAIN + 'famille/'] )
-    liste.append( ['Fantastique', URL_MAIN + 'fantastique/'] )
-    liste.append( ['Guerre', URL_MAIN + 'guerre/'] )
-    liste.append( ['Historique', URL_MAIN + 'historique/'] )
-    liste.append( ['Musical', URL_MAIN + 'musical/'] )
-    liste.append( ['Policier', URL_MAIN + 'policier/'] )
-    liste.append( ['Péplum', URL_MAIN + 'peplum/'] )
-    liste.append( ['Romance', URL_MAIN + 'romance/'] )
-    liste.append( ['Science Fiction', URL_MAIN + 'science-fiction/'] )
-    liste.append( ['Spectacle', URL_MAIN + 'spectacle/'] )
-    liste.append( ['Thriller', URL_MAIN + 'thriller/'] )
-    liste.append( ['Western', URL_MAIN + 'western/'] )
-    liste.append( ['Divers', URL_MAIN + 'divers/'] )
+    liste.append( ['PSG', URL_MAIN + 'frx/team/1_4_216_psg/fanclub/'] )
+    liste.append( ['Marseille (OM)', URL_MAIN + 'frx/team/1_310_383_marseille/fanclub/'] )
+    liste.append( ['Barcelone', URL_MAIN + 'frx/team/1_3_227_barcelona/fanclub/'] )
+    liste.append( ['Real-Madrid', URL_MAIN + 'frx/team/1_163_317_real_madrid/fanclub/'] )
+    liste.append( ['Marchester Utd', URL_MAIN + 'frx/team/1_350_421_manchester_utd/fanclub/'] )
+    liste.append( ['Chelsea', URL_MAIN + 'frx/team/1_351_397_chelsea/fanclub/'] )
+    liste.append( ['Bayern Munich', URL_MAIN + 'frx/team/1_5_227_bayern/fanclub/'] )
+    liste.append( ['Juventus', URL_MAIN + 'frx/team/1_244_365_juventus/fanclub/'] )
+    liste.append( ['Arsenal', URL_MAIN + 'frx/team/1_353_406_arsenal/fanclub/'] )
+    liste.append( ['Liverpool', URL_MAIN + 'frx/team/1_352_412_liverpool/fanclub/'] )
+    liste.append( ['Manchester City', URL_MAIN + 'frx/team/1_363_446_manchester_city/fanclub/'] )
+    liste.append( ['France', URL_MAIN + 'frx/team/1_77_258_france/fanclub/'] )
+    liste.append( ['Dortmund', URL_MAIN + 'frx/team/1_136_296_dortmund/fanclub/'] )
+    liste.append( ['Monaco', URL_MAIN + 'frx/team/1_319_383_monaco/fanclub/'] )
+    liste.append( ['Portugal', URL_MAIN + 'frx/team/1_79_269_portugal/fanclub/'] )
+    liste.append( ['Argentine', URL_MAIN + 'frx/team/1_62_253_argentina/fanclub/'] )
+    liste.append( ['Belgique', URL_MAIN + 'frx/team/1_83_270_belgium/fanclub//'] )
 
-    for sTitle, sUrl in liste: #boucle
+    for sTitle, sUrl in liste:
 
         oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter('siteUrl', sUrl) #sortie de l'url en parametre
-        oGui.addDir(SITE_IDENTIFIER, 'showMovies', sTitle, 'genres.png', oOutputParameterHandler)
-        #ajouter un dossier vers la fonction showMovies avec le titre de chaque categorie.
+        oOutputParameterHandler.addParameter('siteUrl', sUrl)
+        oGui.addDir(SITE_IDENTIFIER, 'showMenu', sTitle, 'genres.png', oOutputParameterHandler)
+        #showMenu car c'est pour afficher les infos du club seul resultat est fonctionnel pour l'instant''
 
     oGui.setEndOfDirectory()
 
-
-def showMovieYears():#creer une liste inversée d'annees
+def showMovies(sSearch = ''):#affiche les catégories qui on des lives'
     oGui = cGui()
-
-    for i in reversed (xrange(1913, 2019)):
-        Year = str(i)
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter('siteUrl', URL_MAIN + 'films/annee-' + Year)
-        oGui.addDir(SITE_IDENTIFIER, 'showMovies', Year, 'annees.png', oOutputParameterHandler)
-
-    oGui.setEndOfDirectory()
-
-
-def showSerieYears():
-    oGui = cGui()
-
-    for i in reversed (xrange(1936, 2019)):
-        Year = str(i)
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter('siteUrl', URL_MAIN + 'series/annee-' + Year)
-        oGui.addDir(SITE_IDENTIFIER, 'showMovies', Year, 'annees.png', oOutputParameterHandler)
-
-    oGui.setEndOfDirectory()
-
-
-def showMovies(sSearch = ''):
-    oGui = cGui() #ouvre l'affichage
-    if sSearch: #si une url et envoyer directement grace a la fonction showSearch
+    if sSearch: 
       sUrl = sSearch
     else:
         oInputParameterHandler = cInputParameterHandler()
-        sUrl = oInputParameterHandler.getValue('siteUrl') #recupere l'url sortie en parametre
+        sUrl = oInputParameterHandler.getValue('siteUrl') 
 
-    oRequestHandler = cRequestHandler(sUrl) #envoye une requete a l'url
-    sHtmlContent = oRequestHandler.request() #requete aussi
-
-    #sHtmlContent = sHtmlContent.replace('<span class="likeThis">', '').replace('</span>', '')
-    #la fonction replace est pratique pour supprimer un code du resultat
+    oRequestHandler = cRequestHandler(sUrl) 
+    sHtmlContent = oRequestHandler.request() 
 
     sPattern = '<a class="main"\s*href="([^"]+)"><b>(.+?)</b></a>\s*</td>\s*<td width=44\s*align="center">\s*<a class="small"\s*href=".+?"><b>\+(.+?)</b></a>'
-    #pour faire simple recherche ce bout de code dans le code source de l'url
-    #- "([^"]+)" je veux cette partie de code qui se trouve entre guillemets mais pas de guillemets dans la chaine
-    #- .+? je ne veux pas cette partie et peux importe ceux qu'elle contient
-    #- >(.+?)< je veux cette partie de code qui se trouve entre < et > mais il peut y avoir n'inporte quoi entre les 2.
-    #- (https*://[^"]) je veux l'adresse qui commence par https ou http jusqu'au prochain guillemet.
-    #
-    #Pour tester vos Regex, vous pouvez utiliser le site https://regex101.com/ en mettant dans les modifiers "gmis"
 
     oParser = cParser()
     aResult = oParser.parse(sHtmlContent, sPattern)
-    #le plus simple et de faire un  VSlog(str(aResult))
-    #dans le fichier log d'xbmc vous pourrez voir un array de ce que recupere le script
-    #et modifier sPattern si besoin
-    VSlog(str(aResult)) #Commenter ou supprimer cette ligne une fois fini
+    #VSlog(str(aResult))
 
-    #affiche une information si aucun resulat
     if (aResult[0] == False):
         oGui.addText(SITE_IDENTIFIER)
 
     if (aResult[0] == True):
         total = len(aResult[1])
-        #dialog barre de progression
         progress_ = progress().VScreate(SITE_NAME)
 
         for aEntry in aResult[1]:
-            progress_.VSupdate(progress_, total) #dialog update
+            progress_.VSupdate(progress_, total)
             if progress_.iscanceled():
                 break
 
-            #L'array affiche vos info dans l'orde de sPattern en commencant a 0, attention dans ce cas la on recupere 6 information
-            #Mais selon votre regex il ne peut y en avoir que 2 ou 3.
             sTitle = str(aEntry[1])
             sUrl2 = str(aEntry[0])
             sThumb = ''
@@ -177,91 +117,55 @@ def showMovies(sSearch = ''):
             sHoster = str(aEntry[2])
             sDesc = ''
 
-            #sTitle = sTitle.replace('En streaming', '')
-
-            #Si vous avez des information dans aEntry Qualiter lang organiser un peux vos titre exemple.
-            #Si vous pouvez la langue et la Qualite en MAJ ".upper()" vostfr.upper() = VOSTFR
             sTitle = sTitle.decode("iso-8859-1", 'ignore')
             sTitle = sTitle.encode("utf-8", 'ignore')
             sTitle = ('%s (%s)') % (sTitle, sHoster) 
-            #mettre les information de streaming entre [] et le reste entre () vstream s'occupe de la couleur automatiquement.
-
-        #Utile que si les liens recuperer ne commence pas par (http://www.nomdusite.com/)
             sUrl2 = URL_MAIN + sUrl2
 
             oOutputParameterHandler = cOutputParameterHandler()
-            oOutputParameterHandler.addParameter('siteUrl', sUrl2) #sortie de l'url
-            oOutputParameterHandler.addParameter('sMovieTitle', sTitle) #sortie du titre
-            oOutputParameterHandler.addParameter('sThumb', sThumb) #sortie du poster
+            oOutputParameterHandler.addParameter('siteUrl', sUrl2) 
+            oOutputParameterHandler.addParameter('sMovieTitle', sTitle) 
+            oOutputParameterHandler.addParameter('sThumb', sThumb) 
 
             if '/series' in sUrl:
                 oGui.addTV(SITE_IDENTIFIER, 'ShowSerieSaisonEpisodes', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
-                #addTV pour sortir les series tv (identifiant, function, titre, icon, poster, description, sortie parametre)
             else:
                 oGui.addMovie(SITE_IDENTIFIER, 'showMovies2', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
-                #addMovies pour sortir les films (identifiant, function, titre, icon, poster, description, sortie parametre)
 
-            #il existe aussi addMisc(identifiant, function, titre, icon, poster, description, sortie parametre)
-            #la difference et pour les metadonner serie, films ou sans
-
-        progress_.VSclose(progress_) #fin du dialog
-
-        sNextPage = __checkForNextPage(sHtmlContent) #cherche la page suivante
-        if (sNextPage != False):
-            oOutputParameterHandler = cOutputParameterHandler()
-            oOutputParameterHandler.addParameter('siteUrl', sNextPage)
-            oGui.addNext(SITE_IDENTIFIER, 'showMovies', '[COLOR teal]Next >>>[/COLOR]', oOutputParameterHandler)
-            #Ajoute une entree pour le lien Next | pas de addMisc pas de poster et de description inutile donc
+        progress_.VSclose(progress_) 
 
     if not sSearch:
-        oGui.setEndOfDirectory() #ferme l'affichage
+        oGui.setEndOfDirectory() 
 
-def showMovies2(sSearch = ''):
-    oGui = cGui() #ouvre l'affichage
-    if sSearch: #si une url et envoyer directement grace a la fonction showSearch
+def showMovies2(sSearch = ''): #affiche les matchs en direct depuis la section showMovie
+    oGui = cGui() 
+    if sSearch: 
       sUrl = sSearch
     else:
         oInputParameterHandler = cInputParameterHandler()
-        sUrl = oInputParameterHandler.getValue('siteUrl') #recupere l'url sortie en parametre
+        sUrl = oInputParameterHandler.getValue('siteUrl') 
 
-    oRequestHandler = cRequestHandler(sUrl) #envoye une requete a l'url
-    sHtmlContent = oRequestHandler.request() #requete aussi
-
-    #sHtmlContent = sHtmlContent.replace('</a>\s*<br><img src=".+?">', '').replace('</a>\s*', '')
-    #la fonction replace est pratique pour supprimer un code du resultat
+    oRequestHandler = cRequestHandler(sUrl)
+    sHtmlContent = oRequestHandler.request() 
 
     sPattern = '<td>\s*<a class=".+?"\s*href="([^"]+)">([^<>]+)</a>\s*.+?<br>\s*<span class="evdesc">([^<>]+)<br>\s*([^<>]+)</span>'
-    #pour faire simple recherche ce bout de code dans le code source de l'url
-    #- "([^"]+)" je veux cette partie de code qui se trouve entre guillemets mais pas de guillemets dans la chaine
-    #- .+? je ne veux pas cette partie et peux importe ceux qu'elle contient
-    #- >(.+?)< je veux cette partie de code qui se trouve entre < et > mais il peut y avoir n'inporte quoi entre les 2.
-    #- (https*://[^"]) je veux l'adresse qui commence par https ou http jusqu'au prochain guillemet.
-    #
-    #Pour tester vos Regex, vous pouvez utiliser le site https://regex101.com/ en mettant dans les modifiers "gmis"
 
     oParser = cParser()
     aResult = oParser.parse(sHtmlContent, sPattern)
-    #le plus simple et de faire un  VSlog(str(aResult))
-    #dans le fichier log d'xbmc vous pourrez voir un array de ce que recupere le script
-    #et modifier sPattern si besoin
-    VSlog(str(aResult)) #Commenter ou supprimer cette ligne une fois fini
+    #VSlog(str(aResult)) 
 
-    #affiche une information si aucun resulat
     if (aResult[0] == False):
         oGui.addText(SITE_IDENTIFIER)
 
     if (aResult[0] == True):
         total = len(aResult[1])
-        #dialog barre de progression
         progress_ = progress().VScreate(SITE_NAME)
 
         for aEntry in aResult[1]:
-            progress_.VSupdate(progress_, total) #dialog update
+            progress_.VSupdate(progress_, total)
             if progress_.iscanceled():
                 break
 
-            #L'array affiche vos info dans l'orde de sPattern en commencant a 0, attention dans ce cas la on recupere 6 information
-            #Mais selon votre regex il ne peut y en avoir que 2 ou 3.
             sTitle2 = str(aEntry[1])
             sUrl2 = str(aEntry[0])
             sThumb = ''
@@ -270,12 +174,6 @@ def showMovies2(sSearch = ''):
             sHoster = str(aEntry[2])
             sDesc = ''
 
-            #sTitle = sTitle.replace('&ndash;', 'vs')
-
-            #Si vous avez des information dans aEntry Qualiter lang organiser un peux vos titre exemple.
-            #Si vous pouvez la langue et la Qualite en MAJ ".upper()" vostfr.upper() = VOSTFR
-            #sTitle = sTitle.decode("iso-8859-1", 'ignore')
-            #sTitle = sTitle.encode("utf-8", 'ignore')
             sTitle2 = sTitle2.decode("iso-8859-1", 'ignore')
             sTitle2 = cUtil().unescape(sTitle2)
             sTitle2 = sTitle2.encode("utf-8")
@@ -289,85 +187,54 @@ def showMovies2(sSearch = ''):
             sQual = sQual.encode("utf-8", 'ignore')
             
             sTitle2 = ('%s (%s) [COLOR yellow]%s[/COLOR]') % (sTitle2, sHoster, sQual)
-            #mettre les information de streaming entre [] et le reste entre () vstream s'occupe de la couleur automatiquement.
 
-        #Utile que si les liens recuperer ne commence pas par (http://www.nomdusite.com/)
             sUrl2 = URL_MAIN + sUrl2
 
             oOutputParameterHandler = cOutputParameterHandler()
-            oOutputParameterHandler.addParameter('siteUrl', sUrl2) #sortie de l'url
-            oOutputParameterHandler.addParameter('sMovieTitle2', sTitle2) #sortie du titre
-            oOutputParameterHandler.addParameter('sThumb', sThumb) #sortie du poster
+            oOutputParameterHandler.addParameter('siteUrl', sUrl2) 
+            oOutputParameterHandler.addParameter('sMovieTitle2', sTitle2) 
+            oOutputParameterHandler.addParameter('sThumb', sThumb) 
 
             if '/series' in sUrl:
                 oGui.addTV(SITE_IDENTIFIER, 'ShowSerieSaisonEpisodes', sTitle2, '', sThumb, sDesc, oOutputParameterHandler)
-                #addTV pour sortir les series tv (identifiant, function, titre, icon, poster, description, sortie parametre)
             else:
                 oGui.addMovie(SITE_IDENTIFIER, 'showMovies3', sTitle2, '', sThumb, sDesc, oOutputParameterHandler)
-                #addMovies pour sortir les films (identifiant, function, titre, icon, poster, description, sortie parametre)
 
-            #il existe aussi addMisc(identifiant, function, titre, icon, poster, description, sortie parametre)
-            #la difference et pour les metadonner serie, films ou sans
-
-        progress_.VSclose(progress_) #fin du dialog
-
-        sNextPage = __checkForNextPage(sHtmlContent) #cherche la page suivante
-        if (sNextPage != False):
-            oOutputParameterHandler = cOutputParameterHandler()
-            oOutputParameterHandler.addParameter('siteUrl', sNextPage)
-            oGui.addNext(SITE_IDENTIFIER, 'showMovies', '[COLOR teal]Next >>>[/COLOR]', oOutputParameterHandler)
-            #Ajoute une entree pour le lien Next | pas de addMisc pas de poster et de description inutile donc
+        progress_.VSclose(progress_)
 
     if not sSearch:
-        oGui.setEndOfDirectory() #ferme l'affichage
+        oGui.setEndOfDirectory()
 
-def showMovies3(sSearch = ''):
-    oGui = cGui() #ouvre l'affichage
-    if sSearch: #si une url et envoyer directement grace a la fonction showSearch
+def showMovies3(sSearch = ''): #affiche les videos disponible du live
+    oGui = cGui()
+    if sSearch: 
       sUrl = sSearch
     else:
         oInputParameterHandler = cInputParameterHandler()
-        sUrl = oInputParameterHandler.getValue('siteUrl') #recupere l'url sortie en parametre
+        sUrl = oInputParameterHandler.getValue('siteUrl') 
 
-    oRequestHandler = cRequestHandler(sUrl) #envoye une requete a l'url
-    sHtmlContent = oRequestHandler.request() #requete aussi
+    oRequestHandler = cRequestHandler(sUrl) 
+    sHtmlContent = oRequestHandler.request() 
     sMovieTitle2 = oInputParameterHandler.getValue('sMovieTitle2')
 
-    #sHtmlContent = sHtmlContent.replace('</a>\s*<br><img src=".+?">', '').replace('</a>\s*', '')
-    #la fonction replace est pratique pour supprimer un code du resultat
-
     sPattern = 'location=yes,toolbar=no,menubar=no,status=no\'\);return false;" href="([^"]+)"'
-    #pour faire simple recherche ce bout de code dans le code source de l'url
-    #- "([^"]+)" je veux cette partie de code qui se trouve entre guillemets mais pas de guillemets dans la chaine
-    #- .+? je ne veux pas cette partie et peux importe ceux qu'elle contient
-    #- >(.+?)< je veux cette partie de code qui se trouve entre < et > mais il peut y avoir n'inporte quoi entre les 2.
-    #- (https*://[^"]) je veux l'adresse qui commence par https ou http jusqu'au prochain guillemet.
-    #
-    #Pour tester vos Regex, vous pouvez utiliser le site https://regex101.com/ en mettant dans les modifiers "gmis"
 
     oParser = cParser()
     aResult = oParser.parse(sHtmlContent, sPattern)
-    #le plus simple et de faire un  VSlog(str(aResult))
-    #dans le fichier log d'xbmc vous pourrez voir un array de ce que recupere le script
-    #et modifier sPattern si besoin
-    VSlog(str(aResult)) #Commenter ou supprimer cette ligne une fois fini
+    #VSlog(str(aResult))
 
-    #affiche une information si aucun resulat
     if (aResult[0] == False):
         oGui.addText(SITE_IDENTIFIER)
 
     if (aResult[0] == True):
         total = len(aResult[1])
-        #dialog barre de progression
         progress_ = progress().VScreate(SITE_NAME)
 
         for aEntry in aResult[1]:
-            progress_.VSupdate(progress_, total) #dialog update
+            progress_.VSupdate(progress_, total) 
             if progress_.iscanceled():
                 break
 
-            #L'array affiche vos info dans l'orde de sPattern en commencant a 0, attention dans ce cas la on recupere 6 information
-            #Mais selon votre regex il ne peut y en avoir que 2 ou 3.
             sTitle = sMovieTitle2
             sUrl2 = str(aEntry[0])
             sThumb = ''
@@ -375,104 +242,54 @@ def showMovies3(sSearch = ''):
             #sQual = str(aEntry[3])
             #sHoster = str(aEntry[2])
             sDesc = ''
-
-            #sTitle = sTitle.replace('&ndash;', 'vs')
-
-            #Si vous avez des information dans aEntry Qualiter lang organiser un peux vos titre exemple.
-            #Si vous pouvez la langue et la Qualite en MAJ ".upper()" vostfr.upper() = VOSTFR
-            #sTitle = sTitle.decode("iso-8859-1", 'ignore')
-            #sTitle = sTitle.encode("utf-8", 'ignore')
-            #sTitle = sTitle.decode("iso-8859-1", 'ignore')
-            #sTitle = cUtil().unescape(sTitle)
-            #sTitle = sTitle.encode("utf-8")
-
-            #sHoster = sHoster.decode("iso-8859-1", 'ignore')
-            #sHoster = cUtil().unescape(sHoster)
-            #sHoster = sHoster.encode("utf-8")
-            
-            #sQual = sQual.decode("iso-8859-1", 'ignore')
-            #sQual = cUtil().unescape(sQual)
-            #sQual = sQual.encode("utf-8", 'ignore')
             
             sTitle = ('%s') % (sMovieTitle2)
-            #mettre les information de streaming entre [] et le reste entre () vstream s'occupe de la couleur automatiquement.
-
-        #Utile que si les liens recuperer ne commence pas par (http://www.nomdusite.com/)
             sUrl2 = URL_MAIN + sUrl2
 
             oOutputParameterHandler = cOutputParameterHandler()
-            oOutputParameterHandler.addParameter('siteUrl', sUrl2) #sortie de l'url
-            oOutputParameterHandler.addParameter('sMovieTitle2', sTitle) #sortie du titre
-            oOutputParameterHandler.addParameter('sThumb', sThumb) #sortie du poster
+            oOutputParameterHandler.addParameter('siteUrl', sUrl2) 
+            oOutputParameterHandler.addParameter('sMovieTitle2', sTitle) 
+            oOutputParameterHandler.addParameter('sThumb', sThumb) 
 
             if '/series' in sUrl:
                 oGui.addTV(SITE_IDENTIFIER, 'ShowSerieSaisonEpisodes', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
-                #addTV pour sortir les series tv (identifiant, function, titre, icon, poster, description, sortie parametre)
             else:
                 oGui.addMovie(SITE_IDENTIFIER, 'showHosters', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
-                #addMovies pour sortir les films (identifiant, function, titre, icon, poster, description, sortie parametre)
 
-            #il existe aussi addMisc(identifiant, function, titre, icon, poster, description, sortie parametre)
-            #la difference et pour les metadonner serie, films ou sans
-
-        progress_.VSclose(progress_) #fin du dialog
-
-        sNextPage = __checkForNextPage(sHtmlContent) #cherche la page suivante
-        if (sNextPage != False):
-            oOutputParameterHandler = cOutputParameterHandler()
-            oOutputParameterHandler.addParameter('siteUrl', sNextPage)
-            oGui.addNext(SITE_IDENTIFIER, 'showMovies', '[COLOR teal]Next >>>[/COLOR]', oOutputParameterHandler)
-            #Ajoute une entree pour le lien Next | pas de addMisc pas de poster et de description inutile donc
+        progress_.VSclose(progress_) 
 
     if not sSearch:
-        oGui.setEndOfDirectory() #ferme l'affichage
+        oGui.setEndOfDirectory() 
 
-def showMovies4(sSearch = ''):
-    oGui = cGui() #ouvre l'affichage
-    if sSearch: #si une url et envoyer directement grace a la fonction showSearch
+def showMovies4(sSearch = ''):#Afficher le club recherché
+    oGui = cGui() 
+    if sSearch: 
       sUrl = sSearch
     else:
         oInputParameterHandler = cInputParameterHandler()
-        sUrl = oInputParameterHandler.getValue('siteUrl') #recupere l'url sortie en parametre
+        sUrl = oInputParameterHandler.getValue('siteUrl') 
 
-    oRequestHandler = cRequestHandler(sUrl) #envoye une requete a l'url
-    sHtmlContent = oRequestHandler.request() #requete aussi
-
-    #sHtmlContent = sHtmlContent.replace('<span class="likeThis">', '').replace('</span>', '')
-    #la fonction replace est pratique pour supprimer un code du resultat
+    oRequestHandler = cRequestHandler(sUrl) 
+    sHtmlContent = oRequestHandler.request() 
 
     sPattern = '<a href="([^"]+)"><span class="sltitle">([^<>]+)</span></a>\s*<br>\s*<font color=".+?">([^<>]+)</font>'
-    #pour faire simple recherche ce bout de code dans le code source de l'url
-    #- "([^"]+)" je veux cette partie de code qui se trouve entre guillemets mais pas de guillemets dans la chaine
-    #- .+? je ne veux pas cette partie et peux importe ceux qu'elle contient
-    #- >(.+?)< je veux cette partie de code qui se trouve entre < et > mais il peut y avoir n'inporte quoi entre les 2.
-    #- (https*://[^"]) je veux l'adresse qui commence par https ou http jusqu'au prochain guillemet.
-    #
-    #Pour tester vos Regex, vous pouvez utiliser le site https://regex101.com/ en mettant dans les modifiers "gmis"
 
     oParser = cParser()
     aResult = oParser.parse(sHtmlContent, sPattern)
-    #le plus simple et de faire un  VSlog(str(aResult))
-    #dans le fichier log d'xbmc vous pourrez voir un array de ce que recupere le script
-    #et modifier sPattern si besoin
-    VSlog(str(aResult)) #Commenter ou supprimer cette ligne une fois fini
-
-    #affiche une information si aucun resulat
+    #VSlog(str(aResult))
+    
     if (aResult[0] == False):
         oGui.addText(SITE_IDENTIFIER)
 
     if (aResult[0] == True):
         total = len(aResult[1])
-        #dialog barre de progression
         progress_ = progress().VScreate(SITE_NAME)
 
         for aEntry in aResult[1]:
-            progress_.VSupdate(progress_, total) #dialog update
+            progress_.VSupdate(progress_, total) 
             if progress_.iscanceled():
                 break
 
-            #L'array affiche vos info dans l'orde de sPattern en commencant a 0, attention dans ce cas la on recupere 6 information
-            #Mais selon votre regex il ne peut y en avoir que 2 ou 3.
             sTitle = str(aEntry[1])
             sUrl2 = str(aEntry[0])
             sThumb = ''
@@ -481,91 +298,56 @@ def showMovies4(sSearch = ''):
             sHoster = str(aEntry[2])
             sDesc = ''
 
-            #sTitle = sTitle.replace('En streaming', '')
-
-            #Si vous avez des information dans aEntry Qualiter lang organiser un peux vos titre exemple.
-            #Si vous pouvez la langue et la Qualite en MAJ ".upper()" vostfr.upper() = VOSTFR
             sTitle = sTitle.decode("iso-8859-1", 'ignore')
             sTitle = sTitle.encode("utf-8", 'ignore')
             sTitle = ('%s (%s)') % (sTitle, sHoster) 
-            #mettre les information de streaming entre [] et le reste entre () vstream s'occupe de la couleur automatiquement.
 
-        #Utile que si les liens recuperer ne commence pas par (http://www.nomdusite.com/)
             sUrl2 = URL_MAIN + sUrl2
 
             oOutputParameterHandler = cOutputParameterHandler()
-            oOutputParameterHandler.addParameter('siteUrl', sUrl2) #sortie de l'url
-            oOutputParameterHandler.addParameter('sMovieTitle', sTitle) #sortie du titre
-            oOutputParameterHandler.addParameter('sThumb', sThumb) #sortie du poster
+            oOutputParameterHandler.addParameter('siteUrl', sUrl2) 
+            oOutputParameterHandler.addParameter('sMovieTitle', sTitle) 
+            oOutputParameterHandler.addParameter('sThumb', sThumb) 
 
             if '/series' in sUrl:
                 oGui.addTV(SITE_IDENTIFIER, 'ShowSerieSaisonEpisodes', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
-                #addTV pour sortir les series tv (identifiant, function, titre, icon, poster, description, sortie parametre)
             else:
                 oGui.addMovie(SITE_IDENTIFIER, 'showMenu', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
-                #addMovies pour sortir les films (identifiant, function, titre, icon, poster, description, sortie parametre)
 
-            #il existe aussi addMisc(identifiant, function, titre, icon, poster, description, sortie parametre)
-            #la difference et pour les metadonner serie, films ou sans
-
-        progress_.VSclose(progress_) #fin du dialog
-
-        sNextPage = __checkForNextPage(sHtmlContent) #cherche la page suivante
-        if (sNextPage != False):
-            oOutputParameterHandler = cOutputParameterHandler()
-            oOutputParameterHandler.addParameter('siteUrl', sNextPage)
-            oGui.addNext(SITE_IDENTIFIER, 'showMovies', '[COLOR teal]Next >>>[/COLOR]', oOutputParameterHandler)
-            #Ajoute une entree pour le lien Next | pas de addMisc pas de poster et de description inutile donc
+        progress_.VSclose(progress_) 
 
     if not sSearch:
-        oGui.setEndOfDirectory() #ferme l'affichage
+        oGui.setEndOfDirectory() 
 
-def showMenu(sSearch = ''):
-    oGui = cGui() #ouvre l'affichage
-    if sSearch: #si une url et envoyer directement grace a la fonction showSearch
+def showMenu(sSearch = ''):#affiche le menu du club
+    oGui = cGui() 
+    if sSearch: 
       sUrl = sSearch
     else:
         oInputParameterHandler = cInputParameterHandler()
-        sUrl = oInputParameterHandler.getValue('siteUrl') #recupere l'url sortie en parametre
+        sUrl = oInputParameterHandler.getValue('siteUrl') 
 
-    oRequestHandler = cRequestHandler(sUrl) #envoye une requete a l'url
-    sHtmlContent = oRequestHandler.request() #requete aussi
-
-    #sHtmlContent = sHtmlContent.replace('<span class="likeThis">', '').replace('</span>', '')
-    #la fonction replace est pratique pour supprimer un code du resultat
+    oRequestHandler = cRequestHandler(sUrl) 
+    sHtmlContent = oRequestHandler.request() 
 
     sPattern = '<a href="([^"]+)" *class="white">(.+?)</a></td>'
-    #pour faire simple recherche ce bout de code dans le code source de l'url
-    #- "([^"]+)" je veux cette partie de code qui se trouve entre guillemets mais pas de guillemets dans la chaine
-    #- .+? je ne veux pas cette partie et peux importe ceux qu'elle contient
-    #- >(.+?)< je veux cette partie de code qui se trouve entre < et > mais il peut y avoir n'inporte quoi entre les 2.
-    #- (https*://[^"]) je veux l'adresse qui commence par https ou http jusqu'au prochain guillemet.
-    #
-    #Pour tester vos Regex, vous pouvez utiliser le site https://regex101.com/ en mettant dans les modifiers "gmis"
 
     oParser = cParser()
     aResult = oParser.parse(sHtmlContent, sPattern)
-    #le plus simple et de faire un  VSlog(str(aResult))
-    #dans le fichier log d'xbmc vous pourrez voir un array de ce que recupere le script
-    #et modifier sPattern si besoin
-    VSlog(str(aResult)) #Commenter ou supprimer cette ligne une fois fini
+    #VSlog(str(aResult)) 
 
-    #affiche une information si aucun resulat
     if (aResult[0] == False):
         oGui.addText(SITE_IDENTIFIER)
 
     if (aResult[0] == True):
         total = len(aResult[1])
-        #dialog barre de progression
         progress_ = progress().VScreate(SITE_NAME)
 
         for aEntry in aResult[1]:
-            progress_.VSupdate(progress_, total) #dialog update
+            progress_.VSupdate(progress_, total) 
             if progress_.iscanceled():
                 break
 
-            #L'array affiche vos info dans l'orde de sPattern en commencant a 0, attention dans ce cas la on recupere 6 information
-            #Mais selon votre regex il ne peut y en avoir que 2 ou 3.
             sTitle = str(aEntry[1])
             sUrl2 = str(aEntry[0])
             sThumb = ''
@@ -574,91 +356,56 @@ def showMenu(sSearch = ''):
             #sHoster = str(aEntry[2])
             sDesc = ''
 
-            #sTitle = sTitle.replace('En streaming', '')
-
-            #Si vous avez des information dans aEntry Qualiter lang organiser un peux vos titre exemple.
-            #Si vous pouvez la langue et la Qualite en MAJ ".upper()" vostfr.upper() = VOSTFR
             sTitle = sTitle.decode("iso-8859-1", 'ignore')
             sTitle = sTitle.encode("utf-8", 'ignore')
             sTitle = ('%s') % (sTitle) 
-            #mettre les information de streaming entre [] et le reste entre () vstream s'occupe de la couleur automatiquement.
 
-        #Utile que si les liens recuperer ne commence pas par (http://www.nomdusite.com/)
             sUrl2 = URL_MAIN + sUrl2
 
             oOutputParameterHandler = cOutputParameterHandler()
-            oOutputParameterHandler.addParameter('siteUrl', sUrl2) #sortie de l'url
-            oOutputParameterHandler.addParameter('sMovieTitle', sTitle) #sortie du titre
-            oOutputParameterHandler.addParameter('sThumb', sThumb) #sortie du poster
+            oOutputParameterHandler.addParameter('siteUrl', sUrl2) 
+            oOutputParameterHandler.addParameter('sMovieTitle', sTitle) 
+            oOutputParameterHandler.addParameter('sThumb', sThumb) 
 
             if '/series' in sUrl:
                 oGui.addTV(SITE_IDENTIFIER, 'ShowSerieSaisonEpisodes', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
-                #addTV pour sortir les series tv (identifiant, function, titre, icon, poster, description, sortie parametre)
             else:
                 oGui.addMovie(SITE_IDENTIFIER, 'showResult', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
-                #addMovies pour sortir les films (identifiant, function, titre, icon, poster, description, sortie parametre)
 
-            #il existe aussi addMisc(identifiant, function, titre, icon, poster, description, sortie parametre)
-            #la difference et pour les metadonner serie, films ou sans
-
-        progress_.VSclose(progress_) #fin du dialog
-
-        sNextPage = __checkForNextPage(sHtmlContent) #cherche la page suivante
-        if (sNextPage != False):
-            oOutputParameterHandler = cOutputParameterHandler()
-            oOutputParameterHandler.addParameter('siteUrl', sNextPage)
-            oGui.addNext(SITE_IDENTIFIER, 'showMovies', '[COLOR teal]Next >>>[/COLOR]', oOutputParameterHandler)
-            #Ajoute une entree pour le lien Next | pas de addMisc pas de poster et de description inutile donc
+        progress_.VSclose(progress_) 
 
     if not sSearch:
-        oGui.setEndOfDirectory() #ferme l'affichage
+        oGui.setEndOfDirectory() 
 
-def showResult(sSearch = ''):
-    oGui = cGui() #ouvre l'affichage
-    if sSearch: #si une url et envoyer directement grace a la fonction showSearch
+def showResult(sSearch = ''):# le menu resultat quand on a choisi le club
+    oGui = cGui() 
+    if sSearch: 
       sUrl = sSearch
     else:
         oInputParameterHandler = cInputParameterHandler()
-        sUrl = oInputParameterHandler.getValue('siteUrl') #recupere l'url sortie en parametre
+        sUrl = oInputParameterHandler.getValue('siteUrl') 
 
-    oRequestHandler = cRequestHandler(sUrl) #envoye une requete a l'url
-    sHtmlContent = oRequestHandler.request() #requete aussi
-
-    #sHtmlContent = sHtmlContent.replace('<span class="likeThis">', '').replace('</span>', '')
-    #la fonction replace est pratique pour supprimer un code du resultat
+    oRequestHandler = cRequestHandler(sUrl) 
+    sHtmlContent = oRequestHandler.request() 
 
     sPattern = '<span class="date">([^<>]+)</span>.+?<span class="graydesc">([^<>]+)</span>.+?<td align="right">([^<>]+).+?<td align="center">\s*<b>([^<>]+)</b>.+?<td>([^<>]+)</td>.+?<font color=".+?">.+?</font>.+?<a class="small" *href="([^"]+)"'
-    #pour faire simple recherche ce bout de code dans le code source de l'url
-    #- "([^"]+)" je veux cette partie de code qui se trouve entre guillemets mais pas de guillemets dans la chaine
-    #- .+? je ne veux pas cette partie et peux importe ceux qu'elle contient
-    #- >(.+?)< je veux cette partie de code qui se trouve entre < et > mais il peut y avoir n'inporte quoi entre les 2.
-    #- (https*://[^"]) je veux l'adresse qui commence par https ou http jusqu'au prochain guillemet.
-    #
-    #Pour tester vos Regex, vous pouvez utiliser le site https://regex101.com/ en mettant dans les modifiers "gmis"
 
     oParser = cParser()
     aResult = oParser.parse(sHtmlContent, sPattern)
-    #le plus simple et de faire un  VSlog(str(aResult))
-    #dans le fichier log d'xbmc vous pourrez voir un array de ce que recupere le script
-    #et modifier sPattern si besoin
-    VSlog(str(aResult)) #Commenter ou supprimer cette ligne une fois fini
+    #VSlog(str(aResult)) 
 
-    #affiche une information si aucun resulat
     if (aResult[0] == False):
         oGui.addText(SITE_IDENTIFIER)
 
     if (aResult[0] == True):
         total = len(aResult[1])
-        #dialog barre de progression
         progress_ = progress().VScreate(SITE_NAME)
 
         for aEntry in aResult[1]:
-            progress_.VSupdate(progress_, total) #dialog update
+            progress_.VSupdate(progress_, total) 
             if progress_.iscanceled():
                 break
 
-            #L'array affiche vos info dans l'orde de sPattern en commencant a 0, attention dans ce cas la on recupere 6 information
-            #Mais selon votre regex il ne peut y en avoir que 2 ou 3.
             sTitle = str(aEntry[2])  + str(aEntry[4])
             sUrl2 = str(aEntry[5])
             sDate = str(aEntry[0])
@@ -672,10 +419,6 @@ def showResult(sSearch = ''):
             #sHoster = str(aEntry[2])
             sDesc = ''
 
-            #sTitle = sTitle.replace('En streaming', '')
-
-            #Si vous avez des information dans aEntry Qualiter lang organiser un peux vos titre exemple.
-            #Si vous pouvez la langue et la Qualite en MAJ ".upper()" vostfr.upper() = VOSTFR
             sTitle = sTitle.decode("iso-8859-1", 'ignore')
             sTitle = cUtil().unescape(sTitle)
             sTitle = sTitle.encode("utf-8", 'ignore')
@@ -692,6 +435,148 @@ def showResult(sSearch = ''):
             sComp = cUtil().unescape(sComp)
             sComp = sComp.encode("utf-8", 'ignore')
             sTitle = ('%s  [%s] (%s) [COLOR]%s[/COLOR]]') % (sTitle, sScore, sDate, sComp) 
+)
+            sUrl2 = URL_MAIN + sUrl2
+
+            oOutputParameterHandler = cOutputParameterHandler()
+            oOutputParameterHandler.addParameter('siteUrl', sUrl2) 
+            oOutputParameterHandler.addParameter('sMovieTitlebis', sTitle) 
+            oOutputParameterHandler.addParameter('sThumb', sThumb) 
+
+            if '/series' in sUrl:
+                oGui.addTV(SITE_IDENTIFIER, 'ShowSerieSaisonEpisodes', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
+            else:
+                oGui.addMovie(SITE_IDENTIFIER, 'showHosters2', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
+
+        progress_.VSclose(progress_) 
+
+    if not sSearch:
+        oGui.setEndOfDirectory() 
+
+def showHosters(): #les hosters des lives celui que je suis bloqué
+    oGui = cGui() 
+    oInputParameterHandler = cInputParameterHandler() 
+    sUrl = oInputParameterHandler.getValue('siteUrl') 
+    sMovieTitle2 = oInputParameterHandler.getValue('sMovieTitle2') 
+    sThumb = oInputParameterHandler.getValue('sThumb') 
+
+    oRequestHandler = cRequestHandler(sUrl) 
+    sHtmlContent = oRequestHandler.request() 
+
+    oParser = cParser()
+    sPattern = '<iframe.+?src="(http://.+?)".+?</iframe>'
+
+    aResult = oParser.parse(sHtmlContent, sPattern)
+    VSlog(str(aResult))
+
+    if (aResult[0] == True):
+        for aEntry in aResult[1]:
+
+            sHosterUrl = str(aEntry)
+            #sHosterUrl = sHosterUrl.decode("iso-8859-1", 'ignore')
+            #sHosterUrl = cUtil().unescape(sHosterUrl)
+            #sHosterUrl = sHosterUrl.encode("utf-8", 'ignore')
+            oHoster = cHosterGui().checkHoster(sHosterUrl) 
+            if (oHoster != False):
+                oHoster.setDisplayName(sMovieTitle2) 
+                oHoster.setFileName(sMovieTitle2) 
+                cHosterGui().showHoster(oGui, oHoster, sHosterUrl, sThumb)
+
+    oGui.setEndOfDirectory() 
+
+def showHosters2(): #Les hosters des videos (pas des lives attentions)
+    oGui = cGui() 
+    oInputParameterHandler = cInputParameterHandler() 
+    sUrl = oInputParameterHandler.getValue('siteUrl') 
+    sMovieTitlebis = oInputParameterHandler.getValue('sMovieTitlebis') 
+    sThumb = oInputParameterHandler.getValue('sThumb') 
+
+    oRequestHandler = cRequestHandler(sUrl) 
+    sHtmlContent = oRequestHandler.request() 
+
+    oParser = cParser()
+    sPattern = '<iframe.+?src="(http.+?)".+?</iframe>'
+
+    aResult = oParser.parse(sHtmlContent, sPattern)
+    #VSlog(str(aResult))
+
+    if (aResult[0] == True):
+        for aEntry in aResult[1]:
+
+            sHosterUrl = str(aEntry)
+            #sHosterUrl = sHosterUrl.decode("iso-8859-1", 'ignore')
+            #sHosterUrl = cUtil().unescape(sHosterUrl)
+            #sHosterUrl = sHosterUrl.encode("utf-8", 'ignore')
+            oHoster = cHosterGui().checkHoster(sHosterUrl) 
+            if (oHoster != False):
+                oHoster.setDisplayName(sMovieTitlebis) 
+                oHoster.setFileName(sMovieTitlebis) 
+                cHosterGui().showHoster(oGui, oHoster, sHosterUrl, sThumb)
+
+    oGui.setEndOfDirectory() 
+
+#def showVideo(sSearch = ''):# pas utilisé pour l'instant c'est pour afficher les videos disponibles sur le résumé du match et les melleurs moment ''
+    oGui = cGui() #ouvre l'affichage
+    if sSearch: #si une url et envoyer directement grace a la fonction showSearch
+      sUrl = sSearch
+    else:
+        oInputParameterHandler = cInputParameterHandler()
+        sUrl = oInputParameterHandler.getValue('siteUrl') #recupere l'url sortie en parametre
+
+    oRequestHandler = cRequestHandler(sUrl) #envoye une requete a l'url
+    sHtmlContent = oRequestHandler.request() #requete aussi
+
+    #sHtmlContent = sHtmlContent.replace('<span class="likeThis">', '').replace('</span>', '')
+    #la fonction replace est pratique pour supprimer un code du resultat
+
+    sPattern = '<a class="small" *href="([^"]+)">([^<>]+)</a>.+?</tr>'
+    #pour faire simple recherche ce bout de code dans le code source de l'url
+    #- "([^"]+)" je veux cette partie de code qui se trouve entre guillemets mais pas de guillemets dans la chaine
+    #- .+? je ne veux pas cette partie et peux importe ceux qu'elle contient
+    #- >(.+?)< je veux cette partie de code qui se trouve entre < et > mais il peut y avoir n'inporte quoi entre les 2.
+    #- (https*://[^"]) je veux l'adresse qui commence par https ou http jusqu'au prochain guillemet.
+    #
+    #Pour tester vos Regex, vous pouvez utiliser le site https://regex101.com/ en mettant dans les modifiers "gmis"
+
+    oParser = cParser()
+    aResult = oParser.parse(sHtmlContent, sPattern)
+    #le plus simple et de faire un  VSlog(str(aResult))
+    #dans le fichier log d'xbmc vous pourrez voir un array de ce que recupere le script
+    #et modifier sPattern si besoin
+    VSlog(str(aResult)) #Commenter ou supprimer cette ligne une fois fini
+
+    #affiche une information si aucun resulat
+    if (aResult[0] == False):
+        oGui.addText(SITE_IDENTIFIER)
+
+    if (aResult[0] == True):
+        total = len(aResult[1])
+        #dialog barre de progression
+        progress_ = progress().VScreate(SITE_NAME)
+
+        for aEntry in aResult[1]:
+            progress_.VSupdate(progress_, total) #dialog update
+            if progress_.iscanceled():
+                break
+
+            #L'array affiche vos info dans l'orde de sPattern en commencant a 0, attention dans ce cas la on recupere 6 information
+            #Mais selon votre regex il ne peut y en avoir que 2 ou 3.
+            sTitle = str(aEntry[1])
+            sUrl2 = str(aEntry[0])
+            sThumb = ''
+            #sLang = str(aEntry[3])
+            #sQual = str(aEntry[4])
+            #sHoster = str(aEntry[2])
+            sDesc = ''
+
+            #sTitle = sTitle.replace('En streaming', '')
+
+            #Si vous avez des information dans aEntry Qualiter lang organiser un peux vos titre exemple.
+            #Si vous pouvez la langue et la Qualite en MAJ ".upper()" vostfr.upper() = VOSTFR
+            sTitle = sTitle.decode("iso-8859-1", 'ignore')
+            sTitle = cUtil().unescape(sTitle)
+            sTitle = sTitle.encode("utf-8", 'ignore')
+            sTitle = ('%s') % (sTitle) 
             #mettre les information de streaming entre [] et le reste entre () vstream s'occupe de la couleur automatiquement.
 
         #Utile que si les liens recuperer ne commence pas par (http://www.nomdusite.com/)
@@ -699,7 +584,7 @@ def showResult(sSearch = ''):
 
             oOutputParameterHandler = cOutputParameterHandler()
             oOutputParameterHandler.addParameter('siteUrl', sUrl2) #sortie de l'url
-            oOutputParameterHandler.addParameter('sMovieTitlebis', sTitle) #sortie du titre
+            oOutputParameterHandler.addParameter('sMovieTitle', sTitle) #sortie du titre
             oOutputParameterHandler.addParameter('sThumb', sThumb) #sortie du poster
 
             if '/series' in sUrl:
@@ -724,150 +609,4 @@ def showResult(sSearch = ''):
     if not sSearch:
         oGui.setEndOfDirectory() #ferme l'affichage
 
-def __checkForNextPage(sHtmlContent): #cherche la page suivante
-    oParser = cParser()
-    sPattern = '<div class="navigation".+? <span.+? <a href="(.+?)">'
-    aResult = oParser.parse(sHtmlContent, sPattern)
-
-    if (aResult[0] == True):
-        return aResult[1][0]
-
-    return False
-
-
-def showHosters(): #recherche et affiche les hotes
-    oGui = cGui() #ouvre l'affichage
-    oInputParameterHandler = cInputParameterHandler() #apelle l'entree de parametre
-    sUrl = oInputParameterHandler.getValue('siteUrl') #apelle siteUrl
-    sMovieTitle2 = oInputParameterHandler.getValue('sMovieTitle2') #appelle le titre
-    sThumb = oInputParameterHandler.getValue('sThumb') #appelle le poster
-
-    oRequestHandler = cRequestHandler(sUrl) #requete sur l'url
-    sHtmlContent = oRequestHandler.request() #requete sur l'url
-
-    oParser = cParser()
-    sPattern = '<iframe.+?src="(http://.+?)".+?</iframe>'
-    #ici nous cherchons toute les sources iframe
-
-    aResult = oParser.parse(sHtmlContent, sPattern)
-    VSlog(str(aResult))
-
-    #si un lien ne s'affiche pas peux etre que l'hote n'est pas supporte par l'addon
-    if (aResult[0] == True):
-        for aEntry in aResult[1]:
-
-            sHosterUrl = str(aEntry)
-            #sHosterUrl = sHosterUrl.decode("iso-8859-1", 'ignore')
-            #sHosterUrl = cUtil().unescape(sHosterUrl)
-            #sHosterUrl = sHosterUrl.encode("utf-8", 'ignore')
-            oHoster = cHosterGui().checkHoster(sHosterUrl) #recherche l'hote dans l'addon
-            if (oHoster != False):
-                oHoster.setDisplayName(sMovieTitle2) #nom affiche
-                oHoster.setFileName(sMovieTitle2) #idem
-                cHosterGui().showHoster(oGui, oHoster, sHosterUrl, sThumb)
-                #affiche le lien (oGui, oHoster, url du lien, poster)
-
-    oGui.setEndOfDirectory() #fin
-
-def showHosters2(): #recherche et affiche les hotes
-    oGui = cGui() #ouvre l'affichage
-    oInputParameterHandler = cInputParameterHandler() #apelle l'entree de parametre
-    sUrl = oInputParameterHandler.getValue('siteUrl') #apelle siteUrl
-    sMovieTitlebis = oInputParameterHandler.getValue('sMovieTitlebis') #appelle le titre
-    sThumb = oInputParameterHandler.getValue('sThumb') #appelle le poster
-
-    oRequestHandler = cRequestHandler(sUrl) #requete sur l'url
-    sHtmlContent = oRequestHandler.request() #requete sur l'url
-
-    oParser = cParser()
-    sPattern = '<iframe.+?src="(http://.+?)".+?</iframe>'
-    #ici nous cherchons toute les sources iframe
-
-    aResult = oParser.parse(sHtmlContent, sPattern)
-    VSlog(str(aResult))
-
-    #si un lien ne s'affiche pas peux etre que l'hote n'est pas supporte par l'addon
-    if (aResult[0] == True):
-        for aEntry in aResult[1]:
-
-            sHosterUrl = str(aEntry)
-            #sHosterUrl = sHosterUrl.decode("iso-8859-1", 'ignore')
-            #sHosterUrl = cUtil().unescape(sHosterUrl)
-            #sHosterUrl = sHosterUrl.encode("utf-8", 'ignore')
-            oHoster = cHosterGui().checkHoster(sHosterUrl) #recherche l'hote dans l'addon
-            if (oHoster != False):
-                oHoster.setDisplayName(sMovieTitlebis) #nom affiche
-                oHoster.setFileName(sMovieTitlebis) #idem
-                cHosterGui().showHoster(oGui, oHoster, sHosterUrl, sThumb)
-                #affiche le lien (oGui, oHoster, url du lien, poster)
-
-    oGui.setEndOfDirectory() #fin
-
-#Pour les series, il y a generalement une etape en plus pour la selection des episodes ou saisons.
-def ShowSerieSaisonEpisodes():
-    oGui = cGui()
-
-    oInputParameterHandler = cInputParameterHandler()
-    sUrl = oInputParameterHandler.getValue('siteUrl')
-    sThumb = oInputParameterHandler.getValue('sThumb')
-    sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
-
-    oRequestHandler = cRequestHandler(sUrl)
-    sHtmlContent = oRequestHandler.request()
-
-    sPattern = '?????????????????????'
-
-    oParser = cParser()
-    aResult = oParser.parse(sHtmlContent, sPattern)
-
-    if (aResult[0] == True):
-        total = len(aResult[1])
-
-        progress_ = progress().VScreate(SITE_NAME)
-
-        for aEntry in aResult[1]:
-            progress_.VSupdate(progress_, total)
-            if progress_.iscanceled():
-                break
-
-            sTitle = sMovieTitle + str(aEntry[1])
-            sUrl2 = str(aEntry[2])
-
-            oOutputParameterHandler = cOutputParameterHandler()
-            oOutputParameterHandler.addParameter('siteUrl', sUrl2)
-            oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
-            oOutputParameterHandler.addParameter('sThumb', sThumb)
-
-            oGui.addTV(SITE_IDENTIFIER, 'seriesHosters', sTitle, '', sThumb, '', oOutputParameterHandler)
-
-        progress_.VSclose(progress_)
-
-    oGui.setEndOfDirectory()
-
-def seriesHosters(): #cherche les episodes de series
-    oGui = cGui()
-    oInputParameterHandler = cInputParameterHandler()
-    sUrl = oInputParameterHandler.getValue('siteUrl')
-    sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
-    sThumb = oInputParameterHandler.getValue('sThumb')
-
-    oRequestHandler = cRequestHandler(sUrl)
-    sHtmlContent = oRequestHandler.request()
-
-    sPattern = '<dd><a href="([^<]+)" class="zoombox.+?" title="(.+?)"><button class="btn">.+?</button></a></dd>'
-    oParser = cParser()
-    aResult = oParser.parse(sHtmlContent, sPattern)
-    if (aResult[0] == True):
-        for aEntry in aResult[1]:
-
-            sHosterUrl = str(aEntry[0])
-            oHoster = cHosterGui().checkHoster(sHosterUrl)
-            if (oHoster != False):
-                oHoster.setDisplayName(aEntry[1])
-                oHoster.setFileName(aEntry[1])
-                cHosterGui().showHoster(oGui, oHoster, sHosterUrl, sThumb)
-
-    oGui.setEndOfDirectory()
-
-
-#Voila c'est un peux brouillon mais ça devrait aider un peu, n'hesitez pas a poser vos questions et meme a partager vos sources.
+ 
