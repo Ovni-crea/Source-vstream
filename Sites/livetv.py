@@ -435,7 +435,6 @@ def showResult(sSearch = ''):# le menu resultat quand on a choisi le club
             sComp = cUtil().unescape(sComp)
             sComp = sComp.encode("utf-8", 'ignore')
             sTitle = ('%s  [%s] (%s) [COLOR]%s[/COLOR]]') % (sTitle, sScore, sDate, sComp) 
-)
             sUrl2 = URL_MAIN + sUrl2
 
             oOutputParameterHandler = cOutputParameterHandler()
