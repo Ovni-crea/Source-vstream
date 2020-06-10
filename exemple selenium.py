@@ -1,7 +1,7 @@
 def bypass_cloudflare(url):
     driverPath = get_driver_path('chromedriver')
     options = webdriver.ChromeOptions()
-    options.add_argument("user-data-dir=Choisir le dossier pour suvegarder")
+    options.add_argument("user-data-dir=C:\cookie")
     driver = webdriver.Chrome(driverPath, chrome_options=options)
     options.headless = False
     driver.get(url)
