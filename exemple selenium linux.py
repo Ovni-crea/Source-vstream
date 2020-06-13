@@ -6,7 +6,7 @@ def bypass_cloudflare_linux(url):
     options.headless = False
     driver.get(url)
     time.sleep(10)
-    page_source = (driver.page_source).encode('utf-8')
+    page_source = (driver.page_source).encode('utf-8', errors='replace')
     driver.close()
     print(page_source)
     sHtmlContent = page_source
